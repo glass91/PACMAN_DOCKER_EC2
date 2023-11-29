@@ -63,7 +63,7 @@ pipeline {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-ansible', keyFileVariable: 'SSH_KEY')]) {
                     sh '''
-                    // sleep 180
+                    sleep 180
                     cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
                     ansible-playbook -i instance_ip.txt playbook_pacman_docker.yaml -u ubuntu --private-key=$SSH_KEY -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no"'
                     '''
