@@ -30,14 +30,27 @@
 
     - name: Add user to the docker group
       user:
-        name: your_user
+        name: ubuntu ### Replace 'your_user' with the actual username
         groups: docker
         append: yes
 
+    - name: Check if Docker Compose is already installed
+      stat:
+        path: /usr/local/bin/docker-compose
+      register: docker_compose_stat
+
     - name: Install Docker Compose
       get_url:
-        url: "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)"
+        url: "https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system }}-{{ ansible_userspace_architecture }}"
         dest: /usr/local/bin/docker-compose
         mode: 'a+x'
-      args:
-        creates: /usr/local/bin/docker-compose
+      when: not docker_compose_stat.stat.exists
+    
+    
+    ##- name: Install Docker Compose
+    ## get_url:
+    ##    url: "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)"
+    ##    dest: /usr/local/bin/docker-compose
+    ##    mode: 'a+x'
+    ##  args:
+    ##    creates: /usr/local/bin/docker-compose
