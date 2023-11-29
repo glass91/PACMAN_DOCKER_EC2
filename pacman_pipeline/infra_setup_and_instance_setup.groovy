@@ -69,14 +69,6 @@ pipeline {
                     '''
                 }
             }
-        stage('Run containers Pacman and Mongo DB') {
-            steps {
-                sh '''
-                cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
-                # Start up the Docker containers in detached mode
-                docker-compose up -d
-                '''
-            }
         }
     }
 }
