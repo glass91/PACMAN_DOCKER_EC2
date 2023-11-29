@@ -8,8 +8,8 @@ pipeline {
             steps {
                 git(
                     branch: 'main', 
-                    url: 'https://github.com/AlexTlst/Pacman_db_docker_ec2.git', 
-                    credentialsId: 'access_to_git'
+                    url: 'https://github.com/glass91/PACMAN_DOCKER_EC2.git', 
+                    credentialsId: 'acces_to_git'
                 )
             }
         }
@@ -27,7 +27,7 @@ pipeline {
                 sh '''
                 cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/TF
                 echo "yes" | terraform init
-                terraform plan -out=terraform.tfplan
+                terraform plan -out=terraform.tfplan 
                 '''
             }
         }
@@ -53,15 +53,15 @@ pipeline {
         stage('Get Terraform Outputs') {
             steps {
                 sh '''
-                cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline
-                terraform output web-address-PacmanDocker > ./ansible/instance_ip.txt
+                cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/TF
+                terraform output web-address-PacmanDocker > /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible/instance_ip.txt
                 '''
             }
         }
 
         stage('Run Ansible') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'tf_instance', keyFileVariable: 'SSH_KEY')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-ansible', keyFileVariable: 'SSH_KEY')]) {
                     sh '''
                     // sleep 180
                     cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
