@@ -47,10 +47,4 @@
       when: not docker_compose_stat.stat.exists
     
     
-    ##- name: Install Docker Compose
-    ## get_url:
-    ##    url: "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)"
-    ##    dest: /usr/local/bin/docker-compose
-    ##    mode: 'a+x'
-    ##  args:
-    ##    creates: /usr/local/bin/docker-compose
+    
