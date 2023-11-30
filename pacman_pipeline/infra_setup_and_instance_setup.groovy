@@ -61,7 +61,7 @@ pipeline {
 
         stage('Run Ansible') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-ansible', keyFileVariable: 'SSH_KEY')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'TestInstance2Last', keyFileVariable: 'SSH_KEY')]) {
                     sh '''
                     sleep 180
                     cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
