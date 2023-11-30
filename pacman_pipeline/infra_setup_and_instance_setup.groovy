@@ -70,5 +70,20 @@ pipeline {
                 }
             }
         }
+    
+        stage('Run containers Pacman and Mongo DB') {
+            steps {
+                script {
+                    sh '''
+                    cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
+                    docker-compose -i instance_ip.txt -f docker-compose-deployment-pacman-and-mongo.yaml -u ubuntu --private-key=$SSH_KEY -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no"'
+                    '''
+                }
+            }
+        }
     }
 }
+
+
+
+
