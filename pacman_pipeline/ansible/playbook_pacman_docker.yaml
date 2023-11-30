@@ -2,6 +2,9 @@
 - name: Install Docker and Docker Compose on Ubuntu
   hosts: all
   become: true
+  vars:
+    compose_file_path: "/home/ubuntu/docker-compose-deployment-pacman-and-mongo.yaml"
+    init_db_script_path: "/home/ubuntu/mongo-init-db/init_user_db.js"
 
   tasks:
     - name: Update apt packages
@@ -47,4 +50,25 @@
       when: not docker_compose_stat.stat.exists
     
     
-    
+    - name: Transfer Docker Compose file
+      copy:
+        src: ./docker-compose-deployment-pacman-and-mongo.yaml
+        dest: "{{ compose_file_path }}"
+        mode: '0644'
+
+    - name: Create mongo-init-db directory
+      file:
+        path: /home/ubuntu/mongo-init-db
+        state: directory
+        mode: '0755'
+
+    - name: Transfer MongoDB initialization script
+      copy:
+        src: ./mongo-init-db/init_user_db.js
+        dest: "{{ init_db_script_path }}"
+        mode: '0644'
+
+    - name: Run Docker Compose to start services
+      shell: docker-compose -f "{{ compose_file_path }}" up -d
+      args:
+        chdir: /home/ubuntu
