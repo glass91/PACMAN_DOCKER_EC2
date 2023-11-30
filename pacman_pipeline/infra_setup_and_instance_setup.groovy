@@ -72,15 +72,3 @@ pipeline {
         }
     }
 }
-
-
-stage('Run containers Pacman and Mongo DB') {
-    steps {
-        withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-ansible', keyFileVariable: 'SSH_KEY')]) {
-            sh '''
-            cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
-            ansible all -i instance_ip.txt -m shell -a "docker-compose -f /path/to/your/docker-compose.yml up -d" -u ubuntu --private-key=$SSH_KEY
-            '''
-        }
-    }
-}
