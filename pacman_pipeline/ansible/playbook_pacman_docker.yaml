@@ -72,3 +72,86 @@
       shell: docker-compose -f "{{ compose_file_path }}" up -d
       args:
         chdir: /home/ubuntu
+
+
+    - name: Ensure MongoDB init script directory exists
+      file:
+        path: "/home/{{ non_root_user }}/pacman/mongo-init-db"
+        state: directory
+        owner: "{{ non_root_user }}"
+        group: "{{ non_root_user }}"
+        mode: '0755'
+
+    - name: Create MongoDB init script
+      copy:
+        dest: "/home/{{ non_root_user }}/pacman/mongo-init-db/init-mongo.js"
+        content: |
+          db.getSiblingDB('admin').createUser({
+              user: "admin",
+              pwd: "adminPassword",  // Replace with a secure password
+              roles: [{ role: "userAdminAnyDatabase", db: "admin" }]
+          });
+
+          db.getSiblingDB('pacman').createUser({
+              user: "pacman",
+              pwd: "pacman",  // Replace with a secure password
+              roles: [{ role: "readWrite", db: "pacman" }]
+          });
+
+          db.getSiblingDB('pacman').createCollection("init");
+          db.getSiblingDB('pacman').init.insert({name: "init"});
+
+    - name: Ensure Docker Compose file directory exists
+      file:
+        path: "/home/{{ non_root_user }}/pacman"
+        state: directory
+        owner: "{{ non_root_user }}"
+        group: "{{ non_root_user }}"
+        mode: '0755'
+
+    - name: Create Docker Compose file for Pacman
+      copy:
+        dest: "/home/{{ non_root_user }}/pacman/docker-compose.yml"
+        content: |
+          version: '3'
+          services:
+            nodejs-app:
+              image: jessehoch/pacman-nodejs-app:latest
+              ports:
+                - "80:8080"  # Map port 8080 of the container to port 8080 on the host
+              environment:
+                MONGO_SERVICE_HOST: mongo
+                MONGO_AUTH_USER: pacman
+                MONGO_AUTH_PWD: pacman
+                MONGO_DATABASE: pacman
+              restart: unless-stopped
+
+            mongo:
+             image: mongo:4.0.4
+             ports:
+               - "27017:27017" # Expose MongoDB on port 27017
+             volumes:
+               - mongo-db:/data/db
+               - ./mongo-init-db/init_user_db.js:/docker-entrypoint-initdb.d/init_user_db.js:ro  # Mount the initialization script directory
+             restart: unless-stopped
+          volumes:
+            mongo-db:
+              driver: local
+            mongo-initdb:
+              driver: local
+              driver_opts:
+                type: none
+                device: /home/ubuntu/pacman/mongo-init-db # need folder mongo-init-db in the same folder as docker-compose.yml
+                o: bind
+          networks:
+            default:
+              external:
+                name: pacman-network
+    - name: Create Docker network
+      docker_network:
+        name: pacman-network
+        state: present
+    - name: Start Pacman App using Docker Compose
+      become: true
+      become_user: "{{ non_root_user }}"
+      command: docker-compose -f /home/{{ non_root_user }}/pacman/docker-compose.yml up -d   

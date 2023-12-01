@@ -71,22 +71,21 @@ pipeline {
             }
         }
     
-        stage('Run containers Pacman and Mongo DB') {
-            steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'TestInstance2Last', keyFileVariable: 'SSH_KEY')]) {
-                    sh '''
-                    cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
-                    ansible all -i instance_ip.txt -m shell -a "docker-compose -f /home/ubuntu/docker-compose-deployment-pacman-and-mongo.yaml up -d" -u ubuntu --private-key=$SSH_KEY -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no"'
-                    ''' 
-
-                }
-    
-            }
-        }
-
     }
+    
 }
+        
+
+    
 
 
 
 
+
+ //stage('Run containers Pacman and Mongo DB') {
+            // steps {
+             //   withCredentials([sshUserPrivateKey(credentialsId: 'TestInstance2Last', keyFileVariable: 'SSH_KEY')]) {
+                //    sh '''
+                  //  cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
+             //ansible all -i instance_ip.txt -m shell -a "docker-compose -f /home/ubuntu/docker-compose-deployment-pacman-and-mongo.yaml up -d" -u ubuntu --private-key=$SSH_KEY -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no"'
+                    //''' 
