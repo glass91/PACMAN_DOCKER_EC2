@@ -12,7 +12,7 @@ pipeline {
                     credentialsId: 'acces_to_git'
                 )
             }
-        }
+        } 
 
         stage('Install Ansible') {
             steps {
@@ -25,7 +25,7 @@ pipeline {
         stage('Terraform Plan') {
             steps {
                 sh '''
-                cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/TF
+                cd ./pacman_pipeline/TF
                 echo "yes" | terraform init
                 terraform plan -out=terraform.tfplan 
                 '''
@@ -44,7 +44,7 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 sh '''
-                cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/TF
+                cd ./pacman_pipeline/TF
                 terraform apply terraform.tfplan
                 '''
             }
@@ -53,8 +53,8 @@ pipeline {
         stage('Get Terraform Outputs') {
             steps {
                 sh '''
-                cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/TF
-                terraform output web-address-PacmanDocker > /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible/instance_ip.txt
+                cd ./pacman_pipeline/TF
+                terraform output web-address-PacmanDocker > ../ansible/instance_ip.txt
                 '''
             }
         }
@@ -63,34 +63,11 @@ pipeline {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: 'TestInstance2Last', keyFileVariable: 'SSH_KEY')]) {
                     sh '''
-                    sleep 180
-                    cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
+                    cd ./pacman_pipeline/ansible
                     ansible-playbook -i instance_ip.txt playbook_pacman_docker.yaml -u ubuntu --private-key=$SSH_KEY -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no"'
                     '''
                 }
             }
         }
-        stage('Start Pacman App') {
-            steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'TestInstance2Last', keyFileVariable: 'SSH_KEY')]) {
-                    sh '''
-                    cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
-                    ansible all -i instance_ip.txt -m shell -a "cd /home/ubuntu && docker-compose -f docker-compose-deployment-pacman-and-mongo.yaml up -d" -u ubuntu --private-key=$SSH_KEY -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no"' 
-                    '''
-                }
-            }
-        }
     }
-}    
-
-
-
-
-
- //stage('Run containers Pacman and Mongo DB') {
-            // steps {
-             //   withCredentials([sshUserPrivateKey(credentialsId: 'TestInstance2Last', keyFileVariable: 'SSH_KEY')]) {
-                //    sh '''
-                  //  cd /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible
-             //ansible all -i instance_ip.txt -m shell -a "docker-compose -f /home/ubuntu/docker-compose-deployment-pacman-and-mongo.yaml up -d" -u ubuntu --private-key=$SSH_KEY -e 'ansible_ssh_common_args="-o StrictHostKeyChecking=no"'
-                    //''' 
+}
