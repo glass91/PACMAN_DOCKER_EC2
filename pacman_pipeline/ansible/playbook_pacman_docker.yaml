@@ -45,7 +45,7 @@
 
     - name: Transfer Docker Compose file
       copy:
-        src: ./docker-compose-deployment-pacman-and-mongo.yaml
+        src: /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible/mongo-init-db/docker-compose-deployment-pacman-and-mongo.yaml
         dest: "{{ compose_file_path }}"
         mode: '0644'
 
