@@ -43,21 +43,23 @@
         dest: /usr/local/bin/docker-compose
         mode: 'a+x'
 
-    - name: Transfer Docker Compose file
-      copy:
-        src: /var/lib/jenkins/workspace/pacman_pipe/pacman_pipeline/ansible/mongo-init-db/docker-compose-deployment-pacman-and-mongo.yaml
-        dest: "{{ compose_file_path }}"
-        mode: '0644'
-
     - name: Create mongo-init-db directory
       file:
         path: "/home/ubuntu/mongo-init-db"
         state: directory
         mode: '0755'
+    
+    - name: Transfer Docker Compose file
+      copy:
+        src: $PWD/mongo-init-db/docker-compose-deployment-pacman-and-mongo.yaml
+        dest: "{{ compose_file_path }}"
+        mode: '0644'
+
+    
 
     - name: Transfer MongoDB initialization script
       copy:
-        src: ./mongo-init-db/init_user_db.js
+        src: $PWD/mongo-init-db/init_user_db.js
         dest: "{{ init_db_script_path }}"
         mode: '0644'
 
